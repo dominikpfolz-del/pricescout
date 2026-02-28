@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1923">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="PriceScout - Fotografiere Produkte und finde den günstigsten Preis">
+<title>PriceScout – Preisvergleich</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0b1117;
+    --bg2: #131c27;
+    --bg3: #1a2736;
+    --bg4: #213245;
+    --accent: #00e5a0;
+    --accent-soft: rgba(0,229,160,0.1);
+    --accent-med: rgba(0,229,160,0.2);
+    --accent-glow: rgba(0,229,160,0.35);
+    --text: #e4edf5;
+    --text2: #8fa3b8;
+    --text3: #556d82;
+    --orange: #ff9f43;
+    --orange-soft: rgba(255,159,67,0.12);
+    --red: #ff6b6b;
+    --blue: #4da6ff;
+    --blue-soft: rgba(77,166,255,0.12);
+    --border: rgba(141,164,184,0.1);
+    --r: 14px;
+    --rs: 10px;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  html, body {
+    height: 100%; font-family: var(--font);
+    background: var(--bg); color: var(--text);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #app {
+    height: 100%; display: flex; flex-direction: column;
+    max-width: 480px; margin: 0 auto; position: relative;
+  }
+
+  /* --- Screens --- */
+  .scr { display:none; flex-direction:column; height:100%; }
+  .scr.on { display:flex; animation: fadeUp .25s ease-out; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* --- Header --- */
+  .hdr {
+    padding: 14px 20px 10px; display:flex;
+    align-items:center; justify-content:space-between; flex-shrink:0;
+  }
+  .hdr-logo { display:flex; align-items:center; gap:9px; }
+  .hdr-mark { width:26px;height:26px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:var(--bg); }
+  .hdr-name { font-size:18px;font-weight:700;letter-spacing:-.4px; }
+  .hdr-name b { color:var(--accent); }
+  .hdr-btn {
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--border);
+    background:var(--bg2);color:var(--text2);display:flex;align-items:center;
+    justify-content:center;cursor:pointer;font-size:16px;transition:.15s;
+  }
+  .hdr-btn:active { transform:scale(.92);background:var(--bg3); }
+
+  /* --- Scroll --- */
+  .scrl { flex:1;overflow-y:auto;padding:0 20px 110px;-webkit-overflow-scrolling:touch; }
+  .scrl::-webkit-scrollbar{width:3px}
+  .scrl::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  /* --- Back row --- */
+  .brow { display:flex;align-items:center;gap:8px;padding:14px 20px 6px;flex-shrink:0; }
+  .bbtn {
+    width:34px;height:34px;border-radius:9px;border:1px solid var(--border);
+    background:var(--bg2);color:var(--text2);display:flex;align-items:center;
+    justify-content:center;cursor:pointer;font-size:16px;
+  }
+  .bbtn:active{background:var(--bg3)}
+  .btitle{font-size:15px;font-weight:600}
+
+  /* === HOME === */
+  .hero { text-align:center; padding:28px 0 24px; }
+  .hero-tag {
+    display:inline-block;padding:4px 12px;background:var(--accent-soft);
+    border:1px solid var(--accent-med);border-radius:16px;
+    font-family:var(--mono);font-size:10px;color:var(--accent);
+    letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px;
+  }
+  .hero h1 { font-size:26px;font-weight:700;line-height:1.2;letter-spacing:-.5px;margin-bottom:8px; }
+  .hero p { font-size:14px;color:var(--text2);line-height:1.5;max-width:290px;margin:0 auto; }
+
+  .scan-btn {
+    width:100%;padding:18px;background:linear-gradient(135deg,var(--accent),#00c98a);
+    border:none;border-radius:var(--r);color:var(--bg);font-family:var(--font);
+    font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;gap:9px;box-shadow:0 4px 20px var(--accent-glow);
+    margin-bottom:12px;transition:.15s;
+  }
+  .scan-btn:active{transform:scale(.97)}
+
+  .text-btn {
+    width:100%;padding:15px;background:var(--bg3);border:1px solid var(--border);
+    border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:15px;
+    font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    gap:8px;margin-bottom:22px;transition:.15s;
+  }
+  .text-btn:active{transform:scale(.97)}
+
+  .how-it-works {
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+    padding:18px;margin-bottom:20px;
+  }
+  .how-title { font-size:13px;font-weight:700;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;gap:6px; }
+  .how-steps { display:flex;flex-direction:column;gap:12px; }
+  .how-step { display:flex;align-items:flex-start;gap:12px; }
+  .how-num {
+    width:28px;height:28px;border-radius:8px;background:var(--bg4);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);
+  }
+  .how-txt { font-size:13px;color:var(--text2);line-height:1.4;padding-top:4px; }
+
+  /* --- Verlauf Items --- */
+  .sec-hdr { display:flex;justify-content:space-between;align-items:center;margin-bottom:10px; }
+  .sec-t { font-size:15px;font-weight:700; }
+  .sec-link { font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--font); }
+  .h-item {
+    background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);
+    padding:12px 14px;margin-bottom:7px;display:flex;justify-content:space-between;
+    align-items:center;cursor:pointer;transition:.1s;
+  }
+  .h-item:active{background:var(--bg4)}
+  .h-name{font-size:13px;font-weight:600;margin-bottom:2px}
+  .h-date{font-size:10px;color:var(--text3);font-family:var(--mono)}
+  .h-price{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--accent)}
+
+  /* === CAMERA === */
+  .cam-wrap { flex:1;display:flex;flex-direction:column;padding:16px 20px;gap:12px; }
+  .cam-view {
+    flex:1;border-radius:var(--r);overflow:hidden;background:var(--bg2);
+    display:flex;align-items:center;justify-content:center;position:relative;
+    border:2px dashed var(--border);
+  }
+  .cam-view img,.cam-view video { width:100%;height:100%;object-fit:contain; }
+  .cam-ph { text-align:center;padding:20px; }
+  .cam-ph p { color:var(--text3);font-size:13px;margin-top:10px; }
+  .cam-acts { display:flex;gap:8px; }
+  .cbtn {
+    flex:1;padding:14px;border-radius:var(--rs);border:none;font-family:var(--font);
+    font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;gap:7px;transition:.12s;
+  }
+  .cbtn:active{transform:scale(.96)}
+  .cbtn.p{background:var(--accent);color:var(--bg)}
+  .cbtn.s{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+  .cbtn.go{background:linear-gradient(135deg,var(--accent),#00c98a);color:var(--bg);box-shadow:0 3px 14px var(--accent-glow)}
+  .cbtn.g{background:transparent;color:var(--text2);border:1px solid var(--border)}
+  #fileIn{display:none}
+
+  /* === TEXT SEARCH === */
+  .search-wrap { padding:20px; flex:1; display:flex; flex-direction:column; }
+  .search-input-wrap {
+    position:relative; margin-bottom:16px;
+  }
+  .search-input {
+    width:100%;padding:16px 16px 16px 44px;background:var(--bg3);border:2px solid var(--border);
+    border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:15px;
+    outline:none;transition:.2s;
+  }
+  .search-input:focus { border-color:var(--accent); }
+  .search-input::placeholder { color:var(--text3); }
+  .search-icon {
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    font-size:18px;color:var(--text3);
+  }
+
+  .ocr-hint {
+    background:var(--blue-soft);border:1px solid rgba(77,166,255,0.2);
+    border-radius:var(--rs);padding:12px 14px;margin-bottom:16px;
+    font-size:12px;color:var(--blue);line-height:1.5;
+  }
+
+  /* === RESULTS === */
+  .res-product {
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+    padding:16px;margin-bottom:14px;
+  }
+  .res-label { font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px; }
+  .res-name { font-size:18px;font-weight:700;letter-spacing:-.3px;line-height:1.3; }
+
+  .shop-section { margin-bottom:16px; }
+  .shop-section-title {
+    font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;
+    letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px;
+  }
+  .shop-card {
+    background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);
+    padding:14px;margin-bottom:8px;cursor:pointer;transition:.1s;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .shop-card:active{background:var(--bg4)}
+  .shop-name{font-size:14px;font-weight:600;margin-bottom:2px}
+  .shop-type{font-size:11px;color:var(--text3)}
+  .shop-arrow{color:var(--accent);font-size:18px}
+
+  .res-info {
+    background:var(--orange-soft);border:1px solid rgba(255,159,67,0.2);
+    border-radius:var(--rs);padding:14px;margin-bottom:16px;
+    font-size:13px;color:var(--orange);line-height:1.5;
+  }
+
+  .res-acts { display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-bottom:20px; }
+  .disclaimer { text-align:center;padding:12px;font-size:10px;color:var(--text3);line-height:1.5; }
+
+  /* empty state */
+  .empty { text-align:center;padding:60px 20px; }
+  .empty p { color:var(--text2);font-size:13px;line-height:1.5; }
+  .empty-icon { font-size:48px;margin-bottom:14px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== HOME ===== -->
+  <div id="scr-home" class="scr on">
+    <div class="hdr">
+      <div class="hdr-logo">
+        <div class="hdr-mark">P</div>
+        <div class="hdr-name">Price<b>Scout</b></div>
+      </div>
+      <button class="hdr-btn" onclick="go('history')" title="Verlauf">📋</button>
+    </div>
+    <div class="scrl">
+      <div class="hero">
+        <div class="hero-tag">v0.2 · 100% Kostenlos</div>
+        <h1>Finde den<br>besten Preis</h1>
+        <p>Fotografiere ein Produkt oder gib den Namen ein – wir vergleichen die Preise aller großen Shops.</p>
+      </div>
+
+      <button class="scan-btn" onclick="go('camera')">
+        📷 Produkt fotografieren
+      </button>
+
+      <button class="text-btn" onclick="go('search')">
+        ⌨️ Produktname eingeben
+      </button>
+
+      <div class="how-it-works">
+        <div class="how-title">💡 So funktioniert's</div>
+        <div class="how-steps">
+          <div class="how-step">
+            <div class="how-num">1</div>
+            <div class="how-txt">Fotografiere das Produkt oder tippe den Namen ein</div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">2</div>
+            <div class="how-txt">Die App liest den Text vom Foto und öffnet Preisvergleiche</div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">3</div>
+            <div class="how-txt">Du siehst Preise bei Amazon, idealo, Google Shopping & mehr</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="homeHist"></div>
+    </div>
+  </div>
+
+  <!-- ===== CAMERA ===== -->
+  <div id="scr-camera" class="scr">
+    <div class="brow">
+      <button class="bbtn" onclick="go('home')">←</button>
+      <span class="btitle">Foto aufnehmen</span>
+    </div>
+    <div class="cam-wrap">
+      <div class="cam-view" id="camView">
+        <div class="cam-ph" id="camPh">
+          <div style="font-size:48px;margin-bottom:8px">📷</div>
+          <p>Fotografiere die Verpackung oder das Etikett des Produkts</p>
+        </div>
+        <img id="prevImg" style="display:none" alt="Vorschau">
+        <video id="camVid" style="display:none" autoplay playsinline></video>
+      </div>
+
+      <div class="cam-acts" id="camActs1">
+        <button class="cbtn p" onclick="openCam()">📷 Kamera</button>
+        <button class="cbtn s" onclick="$('fileIn').click()">🖼️ Galerie</button>
+      </div>
+      <div class="cam-acts" id="camActs2" style="display:none">
+        <button class="cbtn p" onclick="snap()">📸 Auslösen</button>
+        <button class="cbtn g" onclick="closeCam()">✕ Abbrechen</button>
+      </div>
+      <div class="cam-acts" id="camActs3" style="display:none">
+        <button class="cbtn go" onclick="processPhoto()">🔍 Text erkennen & Preise suchen</button>
+        <button class="cbtn g" onclick="resetCam()">🔄 Neu</button>
+      </div>
+    </div>
+    <input type="file" id="fileIn" accept="image/*" capture="environment" onchange="onFile(event)">
+  </div>
+
+  <!-- ===== TEXT SEARCH ===== -->
+  <div id="scr-search" class="scr">
+    <div class="brow">
+      <button class="bbtn" onclick="go('home')">←</button>
+      <span class="btitle">Produktname eingeben</span>
+    </div>
+    <div class="search-wrap">
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" 
+               placeholder="z.B. Nivea Men Shampoo 250ml"
+               autocomplete="off" enterkeyhint="search"
+               onkeydown="if(event.key==='Enter')doSearch()">
+      </div>
+
+      <div class="ocr-hint">
+        💡 Tipp: Tippe den Produktnamen so ein, wie er auf der Verpackung steht – mit Marke, Variante und Größe für die besten Ergebnisse.
+      </div>
+
+      <button class="cbtn go" onclick="doSearch()" style="margin-bottom:16px">
+        🛒 Preise vergleichen
+      </button>
+
+      <div id="recentSearches"></div>
+    </div>
+  </div>
+
+  <!-- ===== OCR PROCESSING ===== -->
+  <div id="scr-ocr" class="scr">
+    <div class="brow">
+      <button class="bbtn" onclick="go('camera')">←</button>
+      <span class="btitle">Text wird erkannt</span>
+    </div>
+    <div class="search-wrap">
+      <div style="text-align:center;padding:20px 0 24px">
+        <div style="font-size:40px;margin-bottom:12px;animation:pulse 1.5s infinite">🔍</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px" id="ocrStatus">Text wird vom Foto gelesen...</div>
+        <div style="font-size:12px;color:var(--text3)">Einen Moment bitte</div>
+      </div>
+
+      <div id="ocrResultArea" style="display:none">
+        <div style="font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">
+          Erkannter Text
+        </div>
+        <div id="ocrText" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;max-height:120px;overflow-y:auto"></div>
+        
+        <div style="font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">
+          Suchbegriff (kannst du anpassen)
+        </div>
+        <div class="search-input-wrap">
+          <span class="search-icon">✏️</span>
+          <input type="text" class="search-input" id="ocrSearchInput" placeholder="Produktname">
+        </div>
+
+        <button class="cbtn go" onclick="doOcrSearch()" style="margin-top:8px;margin-bottom:12px">
+          🛒 Preise vergleichen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RESULTS ===== -->
+  <div id="scr-result" class="scr">
+    <div class="brow">
+      <button class="bbtn" onclick="go('home')">←</button>
+      <span class="btitle">Preisvergleich</span>
+    </div>
+    <div class="scrl" id="resContent"></div>
+  </div>
+
+  <!-- ===== HISTORY ===== -->
+  <div id="scr-history" class="scr">
+    <div class="brow">
+      <button class="bbtn" onclick="go('home')">←</button>
+      <span class="btitle">Suchverlauf</span>
+    </div>
+    <div class="scrl" id="histContent"></div>
+  </div>
+
+</div>
+
+<canvas id="snapCanvas" style="display:none"></canvas>
+
+<script>
+// ================================================================
+// PriceScout v0.2 – 100% kostenlos, kein API-Key nötig
+// ================================================================
+
+const $ = id => document.getElementById(id);
+
+// --- Shops-Datenbank: Alle deutschen Shops mit direkten Such-URLs ---
+const SHOPS = [
+  // Preisvergleich-Portale (diese zeigen ALLE Shops + Preise)
+  { name: 'idealo', type: 'Preisvergleich', icon: '🏆',
+    url: q => `https://www.idealo.de/preisvergleich/MainSearchProductCategory.html?q=${q}`,
+    priority: 1 },
+  { name: 'Google Shopping', type: 'Preisvergleich', icon: '🔍',
+    url: q => `https://www.google.de/search?q=${q}&tbm=shop&hl=de`,
+    priority: 2 },
+  { name: 'billiger.de', type: 'Preisvergleich', icon: '💰',
+    url: q => `https://www.billiger.de/search?searchstring=${q}`,
+    priority: 3 },
+  { name: 'geizhals', type: 'Preisvergleich', icon: '📊',
+    url: q => `https://geizhals.de/?fs=${q}`,
+    priority: 4 },
+
+  // Große Online-Shops
+  { name: 'Amazon', type: 'Online-Shop', icon: '📦',
+    url: q => `https://www.amazon.de/s?k=${q}`,
+    priority: 5 },
+  { name: 'eBay', type: 'Online-Shop / Gebraucht', icon: '🏷️',
+    url: q => `https://www.ebay.de/sch/i.html?_nkw=${q}`,
+    priority: 6 },
+  { name: 'Kaufland', type: 'Online-Shop', icon: '🛒',
+    url: q => `https://www.kaufland.de/s/${q}/`,
+    priority: 7 },
+  { name: 'OTTO', type: 'Online-Shop', icon: '🏠',
+    url: q => `https://www.otto.de/suche/${q}/`,
+    priority: 8 },
+
+  // Elektronik
+  { name: 'MediaMarkt', type: 'Elektronik', icon: '📺',
+    url: q => `https://www.mediamarkt.de/de/search.html?query=${q}`,
+    priority: 9 },
+  { name: 'Saturn', type: 'Elektronik', icon: '💻',
+    url: q => `https://www.saturn.de/de/search.html?query=${q}`,
+    priority: 10 },
+  { name: 'Cyberport', type: 'Elektronik', icon: '🖥️',
+    url: q => `https://www.cyberport.de/?q=${q}`,
+    priority: 11 },
+  { name: 'Notebooksbilliger', type: 'Elektronik', icon: '💾',
+    url: q => `https://www.notebooksbilliger.de/${q.replace(/ /g,'+')}`,
+    priority: 12 },
+
+  // Drogerie
+  { name: 'dm', type: 'Drogerie', icon: '🧴',
+    url: q => `https://www.dm.de/search?query=${q}`,
+    priority: 13 },
+  { name: 'Rossmann', type: 'Drogerie', icon: '💊',
+    url: q => `https://www.rossmann.de/de/search/?text=${q}`,
+    priority: 14 },
+  { name: 'Müller', type: 'Drogerie', icon: '🧹',
+    url: q => `https://www.mueller.de/search/?q=${q}`,
+    priority: 15 },
+
+  // Supermärkte
+  { name: 'REWE', type: 'Supermarkt', icon: '🥬',
+    url: q => `https://shop.rewe.de/productList?search=${q}`,
+    priority: 16 },
+  { name: 'Flink', type: 'Lieferdienst', icon: '🚴',
+    url: q => `https://www.goflink.com/de-DE/search?q=${q}`,
+    priority: 17 },
+];
+
+// --- State ---
+let stream = null;
+let imgData = null;
+let history = [];
+try { history = JSON.parse(localStorage.getItem('ps_hist') || '[]'); } catch(e) { history = []; }
+
+// --- Navigation ---
+function go(name) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  $('scr-' + name).classList.add('on');
+
+  if (name === 'home') renderHome();
+  if (name === 'history') renderHist();
+  if (name === 'camera') resetCam();
+  if (name === 'search') {
+    renderRecent();
+    setTimeout(() => $('searchInput').focus(), 200);
+  }
+}
+
+// --- Home ---
+function renderHome() {
+  const c = $('homeHist');
+  if (!history.length) { c.innerHTML = ''; return; }
+  c.innerHTML = `
+    <div class="sec-hdr">
+      <span class="sec-t">Letzte Suchen</span>
+      <button class="sec-link" onclick="go('history')">Alle →</button>
+    </div>
+    ${history.slice(0,3).map((h,i) => `
+      <div class="h-item" onclick="repeatSearch('${esc(h.query)}')">
+        <div><div class="h-name">${esc(h.query)}</div>
+        <div class="h-date">${new Date(h.date).toLocaleDateString('de-DE')}</div></div>
+      </div>`).join('')}
+  `;
+}
+
+function renderRecent() {
+  const c = $('recentSearches');
+  if (!history.length) { c.innerHTML = ''; return; }
+  c.innerHTML = `
+    <div style="font-size:12px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Letzte Suchen</div>
+    ${history.slice(0,5).map(h => `
+      <div class="h-item" onclick="$('searchInput').value='${esc(h.query)}';doSearch()">
+        <div class="h-name">${esc(h.query)}</div>
+      </div>`).join('')}
+  `;
+}
+
+// --- History ---
+function renderHist() {
+  const c = $('histContent');
+  if (!history.length) {
+    c.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><p>Noch keine Suchen vorhanden.<br>Scanne ein Produkt um loszulegen!</p></div>`;
+    return;
+  }
+  c.innerHTML = `
+    <div style="display:flex;justify-content:flex-end;padding:6px 0">
+      <button class="sec-link" style="color:var(--red)" onclick="if(confirm('Verlauf löschen?')){history=[];localStorage.setItem('ps_hist','[]');renderHist()}">🗑️ Löschen</button>
+    </div>
+    ${history.map(h => `
+      <div class="h-item" onclick="repeatSearch('${esc(h.query)}')">
+        <div><div class="h-name">${esc(h.query)}</div>
+        <div class="h-date">${new Date(h.date).toLocaleString('de-DE')}</div></div>
+      </div>`).join('')}
+  `;
+}
+
+function repeatSearch(q) {
+  $('searchInput').value = q;
+  go('search');
+  setTimeout(() => doSearch(), 100);
+}
+
+// --- Kamera ---
+async function openCam() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode:'environment', width:{ideal:1920}, height:{ideal:1080} }
+    });
+    $('camVid').srcObject = stream;
+    $('camVid').style.display = 'block';
+    $('camPh').style.display = 'none';
+    $('prevImg').style.display = 'none';
+    $('camActs1').style.display = 'none';
+    $('camActs2').style.display = 'flex';
+    $('camActs3').style.display = 'none';
+  } catch(e) {
+    $('fileIn').click();
+  }
+}
+
+function snap() {
+  const v = $('camVid'), c = $('snapCanvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  imgData = c.toDataURL('image/jpeg', 0.85);
+  closeCam();
+  showPrev(imgData);
+}
+
+function closeCam() {
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  $('camVid').style.display = 'none';
+  $('camVid').srcObject = null;
+  $('camActs2').style.display = 'none';
+  $('camActs1').style.display = 'flex';
+  $('camPh').style.display = 'flex';
+}
+
+function onFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => { imgData = ev.target.result; showPrev(imgData); };
+  r.readAsDataURL(f);
+  e.target.value = '';
+}
+
+function showPrev(src) {
+  $('prevImg').src = src;
+  $('prevImg').style.display = 'block';
+  $('camPh').style.display = 'none';
+  $('camVid').style.display = 'none';
+  $('camActs1').style.display = 'none';
+  $('camActs2').style.display = 'none';
+  $('camActs3').style.display = 'flex';
+}
+
+function resetCam() {
+  closeCam();
+  imgData = null;
+  $('prevImg').style.display = 'none';
+  $('camPh').style.display = 'flex';
+  $('camActs1').style.display = 'flex';
+  $('camActs2').style.display = 'none';
+  $('camActs3').style.display = 'none';
+}
+
+// --- OCR (Texterkennung im Browser) ---
+async function processPhoto() {
+  if (!imgData) return;
+  go('ocr');
+  $('ocrStatus').textContent = 'Text wird vom Foto gelesen...';
+  $('ocrResultArea').style.display = 'none';
+
+  // Methode 1: Tesseract.js laden (kostenlose OCR im Browser)
+  try {
+    if (!window.Tesseract) {
+      $('ocrStatus').textContent = 'OCR-Engine wird geladen (einmalig)...';
+      await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    }
+
+    $('ocrStatus').textContent = 'Text wird erkannt...';
+    const result = await Tesseract.recognize(imgData, 'deu+eng', {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          $('ocrStatus').textContent = `Erkennung: ${Math.round((m.progress || 0) * 100)}%`;
+        }
+      }
+    });
+
+    const text = result.data.text.trim();
+    if (text.length < 2) {
+      $('ocrStatus').textContent = 'Kein Text erkannt';
+      $('ocrResultArea').style.display = 'block';
+      $('ocrText').textContent = '(Kein Text auf dem Foto gefunden)';
+      $('ocrSearchInput').value = '';
+      $('ocrSearchInput').placeholder = 'Tippe den Produktnamen manuell ein';
+      return;
+    }
+
+    // Besten Suchbegriff aus dem Text extrahieren
+    const searchTerm = extractProductName(text);
+
+    $('ocrStatus').textContent = '✅ Text erkannt!';
+    $('ocrResultArea').style.display = 'block';
+    $('ocrText').textContent = text;
+    $('ocrSearchInput').value = searchTerm;
+
+  } catch(e) {
+    console.error('OCR Fehler:', e);
+    $('ocrStatus').textContent = 'Text konnte nicht gelesen werden';
+    $('ocrResultArea').style.display = 'block';
+    $('ocrText').textContent = '(Fehler bei der Texterkennung)';
+    $('ocrSearchInput').value = '';
+    $('ocrSearchInput').placeholder = 'Tippe den Produktnamen manuell ein';
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// Produktname aus OCR-Text extrahieren
+function extractProductName(text) {
+  const lines = text.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length >= 3 && l.length <= 60)
+    .filter(l => !/^\d+[.,]\d{2}\s*€?$/.test(l))      // Keine Preise
+    .filter(l => !/^\d{8,13}$/.test(l))                  // Keine Barcodes
+    .filter(l => !/^(www\.|http)/i.test(l))              // Keine URLs
+    .filter(l => !/^\d+\s*(g|kg|ml|l|cl)$/i.test(l))    // Keine reinen Gewichte
+    .filter(l => !/^(best before|mindestens|mhd)/i.test(l));
+
+  // Bekannte Marken suchen
+  const marken = ['Nivea','Dove','Samsung','Apple','Sony','Philips','Bosch','Siemens',
+    'Braun','Dyson','JBL','Bose','Coca-Cola','Pepsi','Milka','Haribo','Barilla',
+    'Nutella','Ferrero','Persil','Ariel','Colgate','Oral-B','Pampers','Henkel',
+    'Head & Shoulders','Pantene','Dr. Oetker','Knorr','Maggi','Heinz','LG',
+    'Logitech','Anker','Razer','Nintendo','PlayStation','Xbox','Lenovo','HP','Dell'];
+
+  let best = '';
+  for (const line of lines) {
+    for (const m of marken) {
+      if (line.toLowerCase().includes(m.toLowerCase())) {
+        best = line;
+        break;
+      }
+    }
+    if (best) break;
+  }
+
+  if (!best && lines.length > 0) {
+    // Nimm die längste Zeile mit Buchstaben
+    best = lines.sort((a, b) => {
+      const aHasLetter = /[a-zA-ZÄÖÜäöü]/.test(a);
+      const bHasLetter = /[a-zA-ZÄÖÜäöü]/.test(b);
+      if (aHasLetter && !bHasLetter) return -1;
+      if (!aHasLetter && bHasLetter) return 1;
+      return b.length - a.length;
+    })[0];
+  }
+
+  return best || text.substring(0, 50);
+}
+
+function doOcrSearch() {
+  const q = $('ocrSearchInput').value.trim();
+  if (!q) { alert('Bitte gib einen Suchbegriff ein.'); return; }
+  $('searchInput').value = q;
+  doSearch();
+}
+
+// --- Suche ausführen ---
+function doSearch() {
+  const q = $('searchInput').value.trim();
+  if (!q || q.length < 2) { alert('Bitte gib einen Produktnamen ein (mindestens 2 Zeichen).'); return; }
+
+  // Bereinigen
+  const clean = q.replace(/[<>{}|\\^~`]/g, '').substring(0, 100);
+
+  // Im Verlauf speichern
+  history = history.filter(h => h.query.toLowerCase() !== clean.toLowerCase());
+  history.unshift({ query: clean, date: new Date().toISOString() });
+  if (history.length > 30) history = history.slice(0, 30);
+  localStorage.setItem('ps_hist', JSON.stringify(history));
+
+  // Ergebnisse rendern
+  renderShopResults(clean);
+  go('result');
+}
+
+// --- Shop-Ergebnisse anzeigen ---
+function renderShopResults(query) {
+  const encoded = encodeURIComponent(query);
+  const c = $('resContent');
+
+  // Shops nach Kategorien gruppieren
+  const preisvergleich = SHOPS.filter(s => s.type === 'Preisvergleich');
+  const onlineShops = SHOPS.filter(s => s.type === 'Online-Shop' || s.type === 'Online-Shop / Gebraucht');
+  const elektronik = SHOPS.filter(s => s.type === 'Elektronik');
+  const drogerie = SHOPS.filter(s => s.type === 'Drogerie');
+  const supermarkt = SHOPS.filter(s => s.type === 'Supermarkt' || s.type === 'Lieferdienst');
+
+  c.innerHTML = `
+    <div class="res-product">
+      <div class="res-label">Suchbegriff</div>
+      <div class="res-name">${esc(query)}</div>
+    </div>
+
+    <div class="res-info">
+      💡 Tippe auf einen Shop um den Preis dort zu sehen. Beginne mit den <strong>Preisvergleich-Portalen</strong> – die zeigen Preise von allen Shops auf einen Blick!
+    </div>
+
+    ${renderShopGroup('🏆 Preisvergleich-Portale', 'Zeigen Preise von vielen Shops', preisvergleich, encoded)}
+    ${renderShopGroup('📦 Große Online-Shops', '', onlineShops, encoded)}
+    ${renderShopGroup('📺 Elektronik-Märkte', '', elektronik, encoded)}
+    ${renderShopGroup('🧴 Drogerie', '', drogerie, encoded)}
+    ${renderShopGroup('🥬 Supermärkte & Lieferdienste', '', supermarkt, encoded)}
+
+    <div class="res-acts">
+      <button class="cbtn go" onclick="go('camera')">📷 Neues Produkt scannen</button>
+      <button class="cbtn s" onclick="shareRes('${esc(query)}')">📤 Teilen</button>
+      <button class="cbtn g" onclick="go('home')">🏠 Zum Start</button>
+    </div>
+    <div class="disclaimer">
+      Preise können sich ändern. Alle Angaben ohne Gewähr.<br>
+      PriceScout ist 100% kostenlos und werbefrei.
+    </div>
+  `;
+  c.scrollTop = 0;
+}
+
+function renderShopGroup(title, subtitle, shops, encoded) {
+  if (!shops.length) return '';
+  return `
+    <div class="shop-section">
+      <div class="shop-section-title">${title}</div>
+      ${shops.map(s => `
+        <div class="shop-card" onclick="window.open('${s.url(encoded)}','_blank','noopener')">
+          <div>
+            <div class="shop-name">${s.icon} ${esc(s.name)}</div>
+            <div class="shop-type">${esc(s.type)}${subtitle && s === shops[0] ? ' · ' + subtitle : ''}</div>
+          </div>
+          <div class="shop-arrow">→</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function shareRes(query) {
+  const text = `Ich suche nach "${query}" – vergleiche Preise mit PriceScout!`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'PriceScout', text }); } catch(e) {}
+  } else {
+    try { await navigator.clipboard.writeText(text); alert('Kopiert!'); } catch(e) { alert(text); }
+  }
+}
+
+// --- Hilfsfunktionen ---
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t || '';
+  return d.innerHTML.replace(/'/g, '&#39;');
+}
+
+// Start
+renderHome();
+</script>
+</body>
+</html>
